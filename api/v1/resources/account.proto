@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package microservice.api.v1.resources;
+
+option go_package = "github.com/sei-ri/microservice.io/api/v1/resources;resources";
+
+message Account {
+  string id = 1;
+  string email = 2;
+  string password = 3;
+  string created_at = 5;
+  string updated_at = 6;
+}

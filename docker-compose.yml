@@ -1,0 +1,60 @@
+version: "3.1"
+
+services:
+  nats:
+    image: nats-streaming
+    container_name: nats
+    ports:
+      - 8222:8222
+      - 4222:4222
+    command: -SDV -store file -dir datastore
+    volumes:
+      - ./data/nats:/datastore
+    networks:
+      - sandbox-net
+
+  mongo:
+    image: mongo:latest
+    container_name: mongo
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: sa
+    ports:
+      - 27017:27017
+    volumes:
+      - ./data/mongo:/data
+    networks:
+      - sandbox-net
+
+  redis:
+    image: redis:3.2
+    container_name: redis
+    ports:
+      - 6379:6379
+    volumes:
+      - ./data/redis:/data
+    networks:
+      - sandbox-net
+
+  mysql:
+    image: mysql:5.7
+    container_name: mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: sa
+      MYSQL_DATABASE: sandbox
+      MYSQL_USER: develop
+      MYSQL_PASSWORD: develop
+    command:
+      mysqld
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_unicode_ci
+    volumes:
+      - ./data/mysql/:/var/www
+    ports:
+      - 3306:3306
+    networks:
+      - sandbox-net
+
+networks:
+  sandbox-net:
+    external: true
