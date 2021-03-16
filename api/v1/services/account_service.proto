@@ -1,0 +1,45 @@
+syntax = "proto3";
+
+package microservice.api.v1.services;
+
+import "api/v1/resources/empty.proto";
+import "api/v1/resources/selflinks.proto";
+import "api/v1/resources/account.proto";
+
+option go_package = "github.com/sei-ri/microservice.io/api/v1/services;services";
+
+service AccountService {
+	rpc CreateAccount (CreateAccountRequest) returns (microservice.api.v1.resources.Empty);
+	rpc ChangePassword (ChangePasswordRequest) returns (microservice.api.v1.resources.Empty);
+	rpc GetAccount (GetAccountRequest) returns (GetAccountResponse);
+	rpc ListAccounts (ListAccountsRequest) returns (ListAccountsResponse);
+}
+
+message CreateAccountRequest {
+	string email = 1;
+	string password = 2;
+}
+
+message ChangePasswordRequest {
+	string id = 1;
+	string password = 2;
+}
+
+message GetAccountRequest {
+	string id = 1;
+}
+
+message GetAccountResponse {
+	microservice.api.v1.resources.Account account = 1;
+	microservice.api.v1.resources.SelfLinks links = 99;
+}
+
+message ListAccountsRequest {
+	int32 limit = 1;
+	int32 offset = 2;
+}
+
+message ListAccountsResponse {
+	repeated GetAccountResponse accounts = 1;
+	microservice.api.v1.resources.SelfLinks links = 99;
+}

@@ -1,0 +1,9 @@
+syntax = "proto3";
+
+package microservice.api.v1.resources;
+
+option go_package = "github.com/sei-ri/microservice.io/api/v1/resources;resources";
+
+message SelfLinks {
+  string self = 1;
+}
