@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package microservice.api.v1.resources;
+
+option go_package = "github.com/sei-ri/microservice.io/api/v1/resources;resources";
+
+message Product {
+  int64 id = 1;
+  string name = 2;
+  string image_url = 3;
+  int32 price = 4;
+  int32 qty = 5;
+  string created_at = 98;
+  string updated_at = 99;
+}
