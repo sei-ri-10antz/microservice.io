@@ -5,6 +5,7 @@ package microservice.api.v1.services;
 import "api/v1/resources/empty.proto";
 import "api/v1/resources/selflinks.proto";
 import "api/v1/resources/account.proto";
+import "google/protobuf/wrappers.proto";
 
 option go_package = "github.com/sei-ri/microservice.io/api/v1/services;services";
 
@@ -16,8 +17,9 @@ service AccountService {
 }
 
 message CreateAccountRequest {
-	string email = 1;
-	string password = 2;
+	google.protobuf.StringValue id = 1;
+	string email = 2;
+	string password = 3;
 }
 
 message ChangePasswordRequest {

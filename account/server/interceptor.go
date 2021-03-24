@@ -2,9 +2,11 @@ package server
 
 import (
 	"context"
+	"errors"
 	"runtime/debug"
 	"time"
 
+	"github.com/sei-ri/microservice.io/account"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -29,5 +31,20 @@ func (s *Server) Recovery() grpc.UnaryServerInterceptor {
 			}
 		}()
 		return handler(ctx, req)
+	}
+}
+
+func (s *Server) Error() grpc.UnaryServerInterceptor {
+	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
+		resp, err = handler(ctx, req)
+		if err != nil {
+			if errors.Is(err, account.ErrAccountNotFound) {
+				err = status.Error(codes.NotFound, err.Error())
+			}
+			if errors.Is(err, account.ErrEmailAlreadyExists) {
+				err = status.Error(codes.AlreadyExists, err.Error())
+			}
+		}
+		return
 	}
 }

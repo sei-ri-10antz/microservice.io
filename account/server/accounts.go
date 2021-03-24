@@ -10,6 +10,7 @@ import (
 	"github.com/sei-ri/microservice.io/account/server/internal"
 	"github.com/sei-ri/microservice.io/api/v1/resources"
 	"github.com/sei-ri/microservice.io/api/v1/services"
+	"google.golang.org/protobuf/types/known/wrapperspb"
 )
 
 func (s *Service) CreateAccount(ctx context.Context, req *services.CreateAccountRequest) (*resources.Empty, error) {
@@ -17,14 +18,15 @@ func (s *Service) CreateAccount(ctx context.Context, req *services.CreateAccount
 		return nil, account.ErrEmailAlreadyExists
 	}
 
-	id := uuid.New().String()
-	if _, err := s.Store.Account.Create().
-		SetID(id).SetEmail(req.Email).
-		SetPassword(req.Password).
-		Save(ctx); err != nil {
+	if req.Id == nil {
+		req.Id = &wrapperspb.StringValue{Value: uuid.New().String()}
+	}
+
+	if err := s.EventSourcing.Dispatch(ctx, req); err != nil {
 		return nil, err
 	}
-	return internal.NewEmpty(id), nil
+
+	return internal.NewEmpty(req.Id.Value), nil
 }
 
 func (s *Service) ChangePassword(ctx context.Context, req *services.ChangePasswordRequest) (*resources.Empty, error) {
@@ -32,9 +34,7 @@ func (s *Service) ChangePassword(ctx context.Context, req *services.ChangePasswo
 		return nil, account.ErrAccountNotFound
 	}
 
-	if _, err := s.Store.Account.UpdateOneID(req.Id).
-		SetPassword(req.Password).
-		Save(ctx); err != nil {
+	if err := s.EventSourcing.Dispatch(ctx, req); err != nil {
 		return nil, err
 	}
 
