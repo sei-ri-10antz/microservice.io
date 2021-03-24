@@ -1,3 +1,2 @@
 # microservice.io
-CQRS + Eventsourcing
-sagas
+CQRS + Eventsourcing with sagas
