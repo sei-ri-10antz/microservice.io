@@ -14,6 +14,7 @@ import (
 	"github.com/sei-ri/microservice.io/api/v1/events"
 	"github.com/sei-ri/microservice.io/api/v1/services"
 	"github.com/sei-ri/microservice.io/pkg/pigeon"
+	"github.com/sei-ri/microservice.io/pkg/pigeon/broker/nats"
 	"github.com/sei-ri/microservice.io/pkg/pigeon/storage/sql"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
@@ -31,7 +32,7 @@ type Server struct {
 
 	PigeonStorageDriver string `envconfig:"PIGEON_STORAGE_DRIVER" default:"mysql"`
 	PigeonStorageURL    string `envconfig:"PIGEON_STORAGE_URL" default:"root:sa@tcp(127.0.0.1:3306)/sandbox?parseTime=True"`
-	PigeonBrokerURL     string `envconfig:"PIGEON_BROKER_URL" default:"root:sa@tcp(127.0.0.1:3306)/sandbox?parseTime=True"`
+	PigeonBrokerURL     string `envconfig:"PIGEON_BROKER_URL" default:"nats://127.0.0.1:4222"`
 
 	log *log.Logger
 }
@@ -99,6 +100,14 @@ func (s *Server) openDB(ctx context.Context) (*ent.Client, error) {
 }
 
 func (s *Server) openEventSourcing(ctx context.Context, store *ent.Client) (*pigeon.Client, error) {
+	broker, err := nats.New(ctx,
+		nats.WithClientID(s.Name),
+		nats.WithNatsURL(s.PigeonBrokerURL),
+	)
+	if err != nil {
+		return nil, err
+	}
+
 	storage, err := sql.New(ctx,
 		sql.WithDriver(s.PigeonStorageDriver),
 		sql.WithURL(s.PigeonStorageURL),
@@ -107,7 +116,10 @@ func (s *Server) openEventSourcing(ctx context.Context, store *ent.Client) (*pig
 		return nil, err
 	}
 
-	pg, err := pigeon.NewClient(ctx, pigeon.WithStorage(storage))
+	pg, err := pigeon.NewClient(ctx,
+		pigeon.WithStorage(storage),
+		pigeon.WithBroker(broker),
+	)
 	if err != nil {
 		return nil, err
 	}
