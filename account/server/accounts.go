@@ -3,7 +3,7 @@ package server
 import (
 	"context"
 
-	"github.com/google/uuid"
+	"github.com/rs/xid"
 	"github.com/sei-ri/microservice.io/account"
 	"github.com/sei-ri/microservice.io/account/ent"
 	entaccount "github.com/sei-ri/microservice.io/account/ent/account"
@@ -19,7 +19,7 @@ func (s *Service) CreateAccount(ctx context.Context, req *services.CreateAccount
 	}
 
 	if req.Id == nil {
-		req.Id = &wrapperspb.StringValue{Value: uuid.New().String()}
+		req.Id = &wrapperspb.StringValue{Value: xid.New().String()}
 	}
 
 	if err := s.EventSourcing.Dispatch(ctx, req); err != nil {

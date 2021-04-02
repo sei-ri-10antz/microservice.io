@@ -130,7 +130,7 @@ func (s *Server) openEventSourcing(ctx context.Context, store *ent.Client) (*pig
 	)
 
 	pg.AddEvents(&events.AccountCreated{}, func(e pigeon.Event) error {
-		s.log.Println("event received: ", e)
+		s.log.Println("recv event: ", e)
 
 		msg, ok := e.Data.(*events.AccountCreated)
 		if !ok {
@@ -146,7 +146,7 @@ func (s *Server) openEventSourcing(ctx context.Context, store *ent.Client) (*pig
 		return err
 	})
 	pg.AddEvents(&events.AccountPasswordChanged{}, func(e pigeon.Event) error {
-		s.log.Println("event received: ", e)
+		s.log.Println("recv event: ", e)
 
 		msg, ok := e.Data.(*events.AccountPasswordChanged)
 		if !ok {

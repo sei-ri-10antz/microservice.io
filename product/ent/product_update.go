@@ -156,7 +156,7 @@ func (pu *ProductUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Table:   product.Table,
 			Columns: product.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeString,
 				Column: product.FieldID,
 			},
 		},
@@ -371,7 +371,7 @@ func (puo *ProductUpdateOne) sqlSave(ctx context.Context) (_node *Product, err e
 			Table:   product.Table,
 			Columns: product.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeString,
 				Column: product.FieldID,
 			},
 		},

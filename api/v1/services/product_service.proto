@@ -19,14 +19,15 @@ service ProductService {
 }
 
 message CreateProductRequest {
+  google.protobuf.StringValue id = 1;
   string name = 2;
   string image_url = 3;
-  int32 price = 4;
-  int32 qty = 5;
+  int64 price = 4;
+  int64 qty = 5;
 }
 
 message UpdateProductRequest {
-  int64 id = 1;
+  string id = 1;
   google.protobuf.StringValue name = 2;
   google.protobuf.StringValue image_url = 3;
   google.protobuf.Int32Value price = 4;
@@ -34,12 +35,12 @@ message UpdateProductRequest {
 }
 
 message DeductProductQtyRequest {
-  int64 id = 1;
-  int32 qty = 2;
+  string id = 1;
+  int64 qty = 2;
 }
 
 message GetProductRequest {
-  int64 id = 1;
+  string id = 1;
 }
 
 message GetProductResponse {

@@ -37,7 +37,7 @@ func (a *AccountAggregate) ApplyChange(event pigeon.Event) error {
 		a.ID = e.Id
 		a.Password = e.Password
 	default:
-		fmt.Errorf("not support event: %v", e)
+		return fmt.Errorf("not support event: %v", e)
 	}
 	return nil
 }

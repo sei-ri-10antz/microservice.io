@@ -5,6 +5,7 @@ import (
 	"runtime/debug"
 	"time"
 
+	"github.com/sei-ri/microservice.io/product"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -29,5 +30,22 @@ func (s *Server) Recovery() grpc.UnaryServerInterceptor {
 			}
 		}()
 		return handler(ctx, req)
+	}
+}
+
+func (s *Server) Error() grpc.UnaryServerInterceptor {
+	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
+		resp, err = handler(ctx, req)
+		if err != nil {
+			switch err {
+			case product.ErrProductNotFound:
+				err = status.Error(codes.NotFound, err.Error())
+			case product.ErrProductQtyBalanceOut:
+				err = status.Error(codes.Aborted, err.Error())
+			default:
+				err = status.Error(codes.Unknown, err.Error())
+			}
+		}
+		return
 	}
 }

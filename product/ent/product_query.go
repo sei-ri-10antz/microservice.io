@@ -76,8 +76,8 @@ func (pq *ProductQuery) FirstX(ctx context.Context) *Product {
 
 // FirstID returns the first Product ID from the query.
 // Returns a *NotFoundError when no Product ID was found.
-func (pq *ProductQuery) FirstID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (pq *ProductQuery) FirstID(ctx context.Context) (id string, err error) {
+	var ids []string
 	if ids, err = pq.Limit(1).IDs(ctx); err != nil {
 		return
 	}
@@ -89,7 +89,7 @@ func (pq *ProductQuery) FirstID(ctx context.Context) (id int, err error) {
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (pq *ProductQuery) FirstIDX(ctx context.Context) int {
+func (pq *ProductQuery) FirstIDX(ctx context.Context) string {
 	id, err := pq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -127,8 +127,8 @@ func (pq *ProductQuery) OnlyX(ctx context.Context) *Product {
 // OnlyID is like Only, but returns the only Product ID in the query.
 // Returns a *NotSingularError when exactly one Product ID is not found.
 // Returns a *NotFoundError when no entities are found.
-func (pq *ProductQuery) OnlyID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (pq *ProductQuery) OnlyID(ctx context.Context) (id string, err error) {
+	var ids []string
 	if ids, err = pq.Limit(2).IDs(ctx); err != nil {
 		return
 	}
@@ -144,7 +144,7 @@ func (pq *ProductQuery) OnlyID(ctx context.Context) (id int, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (pq *ProductQuery) OnlyIDX(ctx context.Context) int {
+func (pq *ProductQuery) OnlyIDX(ctx context.Context) string {
 	id, err := pq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -170,8 +170,8 @@ func (pq *ProductQuery) AllX(ctx context.Context) []*Product {
 }
 
 // IDs executes the query and returns a list of Product IDs.
-func (pq *ProductQuery) IDs(ctx context.Context) ([]int, error) {
-	var ids []int
+func (pq *ProductQuery) IDs(ctx context.Context) ([]string, error) {
+	var ids []string
 	if err := pq.Select(product.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -179,7 +179,7 @@ func (pq *ProductQuery) IDs(ctx context.Context) ([]int, error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (pq *ProductQuery) IDsX(ctx context.Context) []int {
+func (pq *ProductQuery) IDsX(ctx context.Context) []string {
 	ids, err := pq.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -345,7 +345,7 @@ func (pq *ProductQuery) querySpec() *sqlgraph.QuerySpec {
 			Table:   product.Table,
 			Columns: product.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeString,
 				Column: product.FieldID,
 			},
 		},

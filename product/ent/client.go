@@ -161,7 +161,7 @@ func (c *ProductClient) UpdateOne(pr *Product) *ProductUpdateOne {
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *ProductClient) UpdateOneID(id int) *ProductUpdateOne {
+func (c *ProductClient) UpdateOneID(id string) *ProductUpdateOne {
 	mutation := newProductMutation(c.config, OpUpdateOne, withProductID(id))
 	return &ProductUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
@@ -178,7 +178,7 @@ func (c *ProductClient) DeleteOne(pr *Product) *ProductDeleteOne {
 }
 
 // DeleteOneID returns a delete builder for the given id.
-func (c *ProductClient) DeleteOneID(id int) *ProductDeleteOne {
+func (c *ProductClient) DeleteOneID(id string) *ProductDeleteOne {
 	builder := c.Delete().Where(product.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
@@ -191,12 +191,12 @@ func (c *ProductClient) Query() *ProductQuery {
 }
 
 // Get returns a Product entity by its id.
-func (c *ProductClient) Get(ctx context.Context, id int) (*Product, error) {
+func (c *ProductClient) Get(ctx context.Context, id string) (*Product, error) {
 	return c.Query().Where(product.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *ProductClient) GetX(ctx context.Context, id int) *Product {
+func (c *ProductClient) GetX(ctx context.Context, id string) *Product {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)

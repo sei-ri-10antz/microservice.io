@@ -31,7 +31,7 @@ type ProductMutation struct {
 	config
 	op            Op
 	typ           string
-	id            *int
+	id            *string
 	name          *string
 	image_url     *string
 	price         *int
@@ -66,7 +66,7 @@ func newProductMutation(c config, op Op, opts ...productOption) *ProductMutation
 }
 
 // withProductID sets the ID field of the mutation.
-func withProductID(id int) productOption {
+func withProductID(id string) productOption {
 	return func(m *ProductMutation) {
 		var (
 			err   error
@@ -116,9 +116,15 @@ func (m ProductMutation) Tx() (*Tx, error) {
 	return tx, nil
 }
 
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of Product entities.
+func (m *ProductMutation) SetID(id string) {
+	m.id = &id
+}
+
 // ID returns the ID value in the mutation. Note that the ID
 // is only available if it was provided to the builder.
-func (m *ProductMutation) ID() (id int, exists bool) {
+func (m *ProductMutation) ID() (id string, exists bool) {
 	if m.id == nil {
 		return
 	}

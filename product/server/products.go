@@ -4,34 +4,29 @@ import (
 	"context"
 
 	"github.com/golang/protobuf/ptypes/empty"
+	"github.com/rs/xid"
 	"github.com/sei-ri/microservice.io/api/v1/resources"
 	"github.com/sei-ri/microservice.io/api/v1/services"
 	"github.com/sei-ri/microservice.io/product"
 	"github.com/sei-ri/microservice.io/product/ent"
 	entproduct "github.com/sei-ri/microservice.io/product/ent/product"
 	"github.com/sei-ri/microservice.io/product/server/internal"
+	"google.golang.org/protobuf/types/known/wrapperspb"
 )
 
 func (s *Service) CreateProduct(ctx context.Context, req *services.CreateProductRequest) (*resources.Empty, error) {
-	// TODO: CQRS + ES
-	newProduct, err := s.Store.Product.Create().
-		SetName(req.Name).
-		SetImageURL(req.ImageUrl).
-		SetPrice(int(req.Price)).
-		SetQty(int(req.Qty)).
-		Save(ctx)
-	if err != nil {
-		return nil, err
+	if req.Id == nil {
+		req.Id = &wrapperspb.StringValue{Value: xid.New().String()}
 	}
-	return internal.NewEmptyWithID(newProduct.ID), nil
+	return internal.NewEmptyWithID(req.Id.Value), s.EventSourcing.Dispatch(ctx, req)
 }
 
 func (s *Service) UpdateProduct(ctx context.Context, req *services.UpdateProductRequest) (*resources.Empty, error) {
-	if !s.Store.Product.Query().Where(entproduct.IDEQ(int(req.Id))).ExistX(ctx) {
+	if !s.Store.Product.Query().Where(entproduct.IDEQ(req.Id)).ExistX(ctx) {
 		return nil, product.ErrProductNotFound
 	}
 
-	update := s.Store.Product.UpdateOneID(int(req.Id))
+	update := s.Store.Product.UpdateOneID(req.Id)
 	if v := req.Name; v != nil {
 		update.SetName(v.Value)
 	}
@@ -45,7 +40,7 @@ func (s *Service) UpdateProduct(ctx context.Context, req *services.UpdateProduct
 		update.AddQty(int(v.Value))
 	}
 
-	// TODO: CQRS + ES
+	// not es
 	if _, err := update.Save(ctx); err != nil {
 		return nil, err
 	}
@@ -53,7 +48,7 @@ func (s *Service) UpdateProduct(ctx context.Context, req *services.UpdateProduct
 }
 
 func (s *Service) DeductProductQty(ctx context.Context, req *services.DeductProductQtyRequest) (*empty.Empty, error) {
-	item, err := s.Store.Product.Get(ctx, int(req.Id))
+	item, err := s.Store.Product.Get(ctx, req.Id)
 	if err != nil {
 		if ent.IsNotFound(err) {
 			return nil, product.ErrProductNotFound
@@ -61,11 +56,10 @@ func (s *Service) DeductProductQty(ctx context.Context, req *services.DeductProd
 	}
 
 	if item.Qty-int(req.Qty) < 0 {
-		return nil, product.ErrProductBalanceOut
+		return nil, product.ErrProductQtyBalanceOut
 	}
 
-	// TODO: CQRS + ES
-	if _, err := s.Store.Product.UpdateOneID(int(req.Id)).AddQty(-1 * int(req.Qty)).Save(ctx); err != nil {
+	if err := s.EventSourcing.Dispatch(ctx, req); err != nil {
 		return nil, err
 	}
 
@@ -73,7 +67,7 @@ func (s *Service) DeductProductQty(ctx context.Context, req *services.DeductProd
 }
 
 func (s *Service) GetProduct(ctx context.Context, req *services.GetProductRequest) (*services.GetProductResponse, error) {
-	item, err := s.Store.Product.Get(ctx, int(req.Id))
+	item, err := s.Store.Product.Get(ctx, req.Id)
 	if err != nil {
 		if ent.IsNotFound(err) {
 			return nil, product.ErrProductNotFound

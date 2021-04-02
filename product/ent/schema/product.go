@@ -15,6 +15,7 @@ type Product struct {
 // Fields of the Product.
 func (Product) Fields() []ent.Field {
 	return []ent.Field{
+		field.String("id"),
 		field.String("name"),
 		field.String("image_url"),
 		field.Int("price"),

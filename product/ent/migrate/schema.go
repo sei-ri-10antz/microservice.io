@@ -10,7 +10,7 @@ import (
 var (
 	// ProductsColumns holds the columns for the "products" table.
 	ProductsColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "id", Type: field.TypeString},
 		{Name: "name", Type: field.TypeString},
 		{Name: "image_url", Type: field.TypeString},
 		{Name: "price", Type: field.TypeInt},
